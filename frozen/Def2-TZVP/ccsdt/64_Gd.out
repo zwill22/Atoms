@@ -1,0 +1,526 @@
+
+                                 *****************
+                                 * O   R   C   A *
+                                 *****************
+
+           --- An Ab Initio, DFT and Semiempirical electronic structure package ---
+
+                  #######################################################
+                  #                        -***-                        #
+                  #          Department of theory and spectroscopy      #
+                  #               Directorship: Frank Neese             #
+                  #        Max Planck Institute fuer Kohlenforschung    #
+                  #                Kaiser Wilhelm Platz 1               #
+                  #                 D-45470 Muelheim/Ruhr               #
+                  #                      Germany                        #
+                  #                                                     #
+                  #                  All rights reserved                #
+                  #                        -***-                        #
+                  #######################################################
+
+
+                         Program Version 4.2.0 -  RELEASE  -
+
+
+ With contributions from (in alphabetic order):
+   Daniel Aravena         : Magnetic Suceptibility
+   Michael Atanasov       : Ab Initio Ligand Field Theory (pilot matlab implementation)
+   Alexander A. Auer      : GIAO ZORA, VPT2
+   Ute Becker             : Parallelization
+   Giovanni Bistoni       : ED, misc. LED, open-shell LED, HFLED
+   Martin Brehm           : Molecular dynamics
+   Dmytro Bykov           : SCF Hessian
+   Vijay G. Chilkuri      : MRCI spin determinant printing, contributions to CSF-ICE
+   Dipayan Datta          : RHF DLPNO-CCSD density
+   Achintya Kumar Dutta   : EOM-CC, STEOM-CC
+   Dmitry Ganyushin       : Spin-Orbit,Spin-Spin,Magnetic field MRCI
+   Miquel Garcia          : C-PCM Hessian, Gaussian charge scheme
+   Yang Guo               : DLPNO-NEVPT2, CIM, IAO-localization
+   Andreas Hansen         : Spin unrestricted coupled pair/coupled cluster methods
+   Benjamin Helmich-Paris : CASSCF linear response (MC-RPA)
+   Lee Huntington         : MR-EOM, pCC
+   Robert Izsak           : Overlap fitted RIJCOSX, COSX-SCS-MP3, EOM
+   Christian Kollmar      : KDIIS, OOCD, Brueckner-CCSD(T), CCSD density
+   Simone Kossmann        : Meta GGA functionals, TD-DFT gradient, OOMP2, MP2 Hessian
+   Martin Krupicka        : AUTO-CI
+   Lucas Lang             : DCDCAS
+   Dagmar Lenk            : GEPOL surface, SMD
+   Dimitrios Liakos       : Extrapolation schemes; Compound Job, initial MDCI parallelization
+   Dimitrios Manganas     : Further ROCIS development; embedding schemes
+   Dimitrios Pantazis     : SARC Basis sets
+   Taras Petrenko         : DFT Hessian,TD-DFT gradient, ASA, ECA, R-Raman, ABS, FL, XAS/XES, NRVS
+   Peter Pinski           : DLPNO-MP2, DLPNO-MP2 Gradient
+   Christoph Reimann      : Effective Core Potentials
+   Marius Retegan         : Local ZFS, SOC
+   Christoph Riplinger    : Optimizer, TS searches, QM/MM, DLPNO-CCSD(T), (RO)-DLPNO pert. Triples
+   Tobias Risthaus        : Range-separated hybrids, TD-DFT gradient, RPA, STAB
+   Michael Roemelt        : Original ROCIS implementation
+   Masaaki Saitow         : Open-shell DLPNO-CCSD energy and density
+   Barbara Sandhoefer     : DKH picture change effects
+   Avijit Sen             : IP-ROCIS
+   Kantharuban Sivalingam : CASSCF convergence, NEVPT2, FIC-MRCI
+   Bernardo de Souza      : ESD, SOC TD-DFT
+   Georgi Stoychev        : AutoAux, RI-MP2 NMR
+   Willem Van den Heuvel  : Paramagnetic NMR
+   Boris Wezisla          : Elementary symmetry handling
+   Frank Wennmohs         : Technical directorship
+
+
+ We gratefully acknowledge several colleagues who have allowed us to
+ interface, adapt or use parts of their codes:
+   Stefan Grimme, W. Hujo, H. Kruse,             : VdW corrections, initial TS optimization,
+                  C. Bannwarth                     DFT functionals, gCP, sTDA/sTD-DF
+   Ed Valeev, F. Pavosevic, A. Kumar             : LibInt (2-el integral package), F12 methods
+   Garnet Chan, S. Sharma, J. Yang, R. Olivares  : DMRG
+   Ulf Ekstrom                                   : XCFun DFT Library
+   Mihaly Kallay                                 : mrcc  (arbitrary order and MRCC methods)
+   Andreas Klamt, Michael Diedenhofen            : otool_cosmo (COSMO solvation model)
+   Jiri Pittner, Ondrej Demel                    : Mk-CCSD
+   Frank Weinhold                                : gennbo (NPA and NBO analysis)
+   Christopher J. Cramer and Donald G. Truhlar   : smd solvation model
+   Lars Goerigk                                  : TD-DFT with DH, B97 family of functionals
+   V. Asgeirsson, H. Jonsson                     : NEB implementation
+   FAccTs GmbH                                   : IRC, NEB, NEB-TS, Multilevel, MM, QM/MM, CI optimization
+   S Lehtola, MJT Oliveira, MAL Marques          : LibXC Library
+
+
+ Your calculation uses the libint2 library for the computation of 2-el integrals
+ For citations please refer to: http://libint.valeyev.net
+
+ Your ORCA version has been built with support for libXC version: 4.2.3
+ For citations please refer to: https://tddft.org/programs/libxc/
+
+ This ORCA versions uses:
+   CBLAS   interface :  Fast vector & matrix operations
+   LAPACKE interface :  Fast linear algebra routines
+   SCALAPACK package :  Parallel linear algebra routines
+
+
+----- Orbital basis set information -----
+Your calculation utilizes the basis: def2-TZVP
+   F. Weigend and R. Ahlrichs, Phys. Chem. Chem. Phys. 7, 3297 (2005).
+
+cite the ECPs for Gd [Def2-ECP] as follows:
+Ce-Yb(ecp-28): M. Dolg, H. Stoll, H.Preuss, J. Chem. Phys., 1989, 90, 1730-1734.
+Y-Cd(ecp-28), Hf-Hg(ecp-46): D. Andrae,U. Haeussermann, M. Dolg, H. Stoll, H. Preuss, Theor. Chim. Acta, 1990, 77, 123-141.
+In-Sb(ecp-28), Tl-Bi(ecp-46): B. Metz, H. Stoll, M. Dolg, J. Chem. Phys., 2000, 113, 2563-2569.
+Te-Xe(ecp-28), Po-Rn(ecp-46): K. A. Peterson, D. Figgen, E. Goll, H. Stoll, M. Dolg, J. Chem. Phys., 2003, 119, 11113-11123.
+Rb(ecp-28), Cs(ecp-46): T. Leininger, A. Nicklass, W. Kuechle, H. Stoll, M. Dolg, A. Bergner, Chem. Phys. Lett., 1996, 255, 274-280.
+Sr(ecp-28), Ba(ecp-46): M. Kaupp, P. V. Schleyer, H. Stoll and H. Preuss, J. Chem. Phys., 1991, 94, 1360-1366.
+La(ecp-46): M. Dolg, H. Stoll, A. Savin, H. Preuss, Theor. Chim. Acta, 1989, 75, 173-194.
+Lu(ecp-28): X. Cao, M. Dolg, J. Chem. Phys., 2001, 115, 7348-7355.
+
+ECP parameters for Gd [Def2-ECP] have been obtained from:
+TURBOMOLE (7.0.2)
+
+================================================================================
+                                        WARNINGS
+                       Please study these warnings very carefully!
+================================================================================
+
+
+WARNING: your system is open-shell and RHF/RKS was chosen
+  ===> : WILL SWITCH to UHF/UKS
+
+
+WARNING: MDCI localization with Augmented Hessian Foster-Boys
+  ===> : Switching off randomization!
+
+WARNING: Post HF methods need fully converged wavefunctions
+  ===> : Setting SCFConvForced true
+         You can overwrite this default with %scf ConvForced false 
+
+
+INFO   : the flag for use of LIBINT has been found!
+
+================================================================================
+                                       INPUT FILE
+================================================================================
+NAME = 64_Gd.in
+|  1> #
+|  2> # 64_Gd CCSD(T)/Def2-TZVP
+|  3> #
+|  4> ! CCSD(T) Def2-TZVP tightscf
+|  5> 
+|  6> *xyz 0 9
+|  7>  Gd 0.0 0.0 0.0
+|  8> *
+|  9> 
+| 10> %maxcore 5000 
+| 11> 
+| 12> %pal
+| 13> nprocs 24
+| 14> end
+| 15> 
+| 16> 
+| 17>                          ****END OF INPUT****
+================================================================================
+
+                       ****************************
+                       * Single Point Calculation *
+                       ****************************
+
+---------------------------------
+CARTESIAN COORDINATES (ANGSTROEM)
+---------------------------------
+  Gd     0.000000    0.000000    0.000000
+
+----------------------------
+CARTESIAN COORDINATES (A.U.)
+----------------------------
+  NO LB      ZA    FRAG     MASS         X           Y           Z
+   0 Gd   36.0000*   0   157.250    0.000000    0.000000    0.000000
+* core charge reduced due to ECP
+
+--------------------------------
+INTERNAL COORDINATES (ANGSTROEM)
+--------------------------------
+ Gd     0   0   0     0.000000000000     0.00000000     0.00000000
+
+---------------------------
+INTERNAL COORDINATES (A.U.)
+---------------------------
+ Gd     0   0   0     0.000000000000     0.00000000     0.00000000
+
+---------------------
+BASIS SET INFORMATION
+---------------------
+There are 1 groups of distinct atoms
+
+ Group   1 Type Gd  : 14s14p10d8f1g contracted to 10s7p5d4f1g pattern {5111111111/6311111/61111/5111/1}
+
+Atom   0Gd   basis set group =>   1
+-------------------------
+ECP PARAMETER INFORMATION
+-------------------------
+
+ Group 1, Type Gd ECP Def2-ECP (replacing 28 core electrons, lmax=5)
+
+Atom   0Gd   ECP group =>   1
+
+
+
+           ************************************************************
+           *        Program running with 24 parallel MPI-processes    *
+           *              working on a common directory               *
+           ************************************************************
+------------------------------------------------------------------------------
+                           ORCA GTO INTEGRAL CALCULATION
+------------------------------------------------------------------------------
+
+                         BASIS SET STATISTICS AND STARTUP INFO
+
+ # of primitive gaussian shells          ...   47
+ # of primitive gaussian functions       ...  171
+ # of contracted shells                  ...   27
+ # of contracted basis functions         ...   93
+ Highest angular momentum                ...    4
+ Maximum contraction depth               ...    6
+ Integral package used                   ... LIBINT
+ Integral threshhold            Thresh   ...  2.500e-11
+ Primitive cut-off              TCut     ...  2.500e-12
+
+
+------------------------------ INTEGRAL EVALUATION ----------------------------
+
+
+ * One electron integrals 
+
+   ECP integrals                         ... done
+ Pre-screening matrix                    ... done
+ Shell pair data                         ... done (   0.000 sec)
+
+
+
+           ************************************************************
+           *        Program running with 24 parallel MPI-processes    *
+           *              working on a common directory               *
+           ************************************************************
+-------------------------------------------------------------------------------
+                                 ORCA SCF
+-------------------------------------------------------------------------------
+
+------------
+SCF SETTINGS
+------------
+Hamiltonian:
+ Ab initio Hamiltonian  Method          .... Hartree-Fock(GTOs)
+
+
+General Settings:
+ Integral files         IntName         .... 64_Gd
+ Hartree-Fock type      HFTyp           .... UHF
+ Total Charge           Charge          ....    0
+ Multiplicity           Mult            ....    9
+ Number of Electrons    NEL             ....   36
+ Basis Dimension        Dim             ....   93
+ Nuclear Repulsion      ENuc            ....      0.0000000000 Eh
+
+Convergence Acceleration:
+ DIIS                   CNVDIIS         .... on
+   Start iteration      DIISMaxIt       ....    12
+   Startup error        DIISStart       ....  0.200000
+   # of expansion vecs  DIISMaxEq       ....     5
+   Bias factor          DIISBfac        ....   1.050
+   Max. coefficient     DIISMaxC        ....  10.000
+ Newton-Raphson         CNVNR           .... off
+ SOSCF                  CNVSOSCF        .... off
+ Level Shifting         CNVShift        .... on
+   Level shift para.    LevelShift      ....    0.2500
+   Turn off err/grad.   ShiftErr        ....    0.0010
+ Zerner damping         CNVZerner       .... off
+ Static damping         CNVDamp         .... on
+   Fraction old density DampFac         ....    0.7000
+   Max. Damping (<1)    DampMax         ....    0.9800
+   Min. Damping (>=0)   DampMin         ....    0.0000
+   Turn off err/grad.   DampErr         ....    0.1000
+ Fernandez-Rico         CNVRico         .... off
+
+SCF Procedure:
+ Maximum # iterations   MaxIter         ....   125
+ SCF integral mode      SCFMode         .... Direct
+   Integral package                     .... LIBINT
+ Reset frequency        DirectResetFreq ....    20
+ Integral Threshold     Thresh          ....  2.500e-11 Eh
+ Primitive CutOff       TCut            ....  2.500e-12 Eh
+
+Convergence Tolerance:
+ Convergence Check Mode ConvCheckMode   .... Total+1el-Energy
+ Convergence forced     ConvForced      .... 1
+ Energy Change          TolE            ....  1.000e-08 Eh
+ 1-El. energy change                    ....  1.000e-05 Eh
+ DIIS Error             TolErr          ....  5.000e-07
+
+
+Diagonalization of the overlap matrix:
+Smallest eigenvalue                        ... 1.126e-03
+Time for diagonalization                   ...    0.003 sec
+Threshold for overlap eigenvalues          ... 1.000e-08
+Number of eigenvalues below threshold      ... 0
+Time for construction of square roots      ...    0.013 sec
+Total time needed                          ...    0.016 sec
+
+-------------------
+DFT GRID GENERATION
+-------------------
+
+General Integration Accuracy     IntAcc      ...  4.340
+Radial Grid Type                 RadialGrid  ... Gauss-Chebyshev
+Angular Grid (max. acc.)         AngularGrid ... Lebedev-110
+Angular grid pruning method      GridPruning ... 3 (G Style)
+Weight generation scheme         WeightScheme... Becke
+Basis function cutoff            BFCut       ...    1.0000e-11
+Integration weight cutoff        WCut        ...    1.0000e-14
+Grids for H and He will be reduced by one unit
+
+# of grid points (after initial pruning)     ...   3612 (   0.0 sec)
+# of grid points (after weights+screening)   ...   3612 (   0.0 sec)
+Grid point division into batches done        ...    0.0 sec
+Reduced shell lists constructed in    0.0 sec
+
+Total number of grid points                  ...     3612
+Total number of batches                      ...       57
+Average number of points per batch           ...       63
+Average number of grid points per atom       ...     3612
+Average number of shells per batch           ...     4.25 (15.74%)
+Average number of basis functions per batch  ...    12.25 (13.17%)
+Average number of large shells per batch     ...     3.75 (88.24%)
+Average number of large basis fcns per batch ...     9.75 (79.59%)
+Maximum spatial batch extension              ...  24.96, 38.92, 38.92 au
+Average spatial batch extension              ...   1.28,  1.81,  2.05 au
+
+Time for grid setup =    0.072 sec
+
+------------------------------
+INITIAL GUESS: MODEL POTENTIAL
+------------------------------
+Loading Hartree-Fock densities                     ... done
+  calling /sw/apps/orca/orca_4_2_0_linux_x86-64_openmpi314/orca 64_Gd_atom64.inp > 64_Gd_atom64.out in order to generate an atomic fitting density for atom 0 (Gd with ECP) on-the-fly... 
+    atom 0 (Gd), assumed electronic state with S=9: 1s2 2s2 2p6 3s2 3p6 4s2 3d10 4p6 5s2 4d10 5p6 6s2 4f7 5d1           ... done
+Calculating cut-offs                               ... done
+Setting up the integral package                    ... done
+Initializing the effective Hamiltonian             ... done
+Starting the Coulomb interaction                   ... done (   0.0 sec)
+Reading the grid                                   ... done
+Mapping shells                                     ... done
+Starting the XC term evaluation                    ... done (   0.0 sec)
+Transforming the Hamiltonian                       ... done (   0.0 sec)
+Diagonalizing the Hamiltonian                      ... done (   0.0 sec)
+Back transforming the eigenvectors                 ... done (   0.0 sec)
+Now organizing SCF variables                       ... done
+                      ------------------
+                      INITIAL GUESS DONE (  23.8 sec)
+                      ------------------
+--------------
+SCF ITERATIONS
+--------------
+ITER       Energy         Delta-E        Max-DP      RMS-DP      [F,P]     Damp
+               ***  Starting incremental Fock matrix formation  ***
+  0   -736.8322563083   0.000000000000 2.03808250  0.02741787 17.0054339 0.7000
+  1   -748.0101947697 -11.177938461442 0.50089322  0.00831085 10.0302707 0.7000
+  2   -754.1843101781  -6.174115408423 0.35169547  0.00573727  6.1050728 0.7000
+  3   -757.6258077834  -3.441497605288 0.24531759  0.00389839  3.8223566 0.7000
+  4   -759.6263941862  -2.000586402782 0.18363270  0.00291770  2.4523294 0.7000
+  5   -760.8408544058  -1.214460219640 0.16763395  0.00234948  1.6052439 0.7000
+  6   -761.6066779528  -0.765823547014 0.15240596  0.00194594  1.0674319 0.7000
+  7   -762.1047381388  -0.498060185951 0.13616326  0.00161956  0.7182772 0.7000
+  8   -762.4363917850  -0.331653646196 0.11941836  0.00134464  0.4875198 0.7000
+  9   -762.6610713469  -0.224679561911 0.10311088  0.00111283  0.3329129 0.7000
+ 10   -762.8151357962  -0.154064449305 0.08797188  0.00091925  0.2282777 0.7000
+                               ***Turning on DIIS***
+ 11   -762.9216589701  -0.106523173916 0.07440992  0.00075917  0.1569521 0.7000
+ 12   -763.0169512843  -0.095292314161 0.06929764  0.00069809  0.1080907 0.7000
+ 13   -763.1006438037  -0.083692519378 0.20642346  0.00205169  0.0750185 0.0000
+ 14   -763.1712311202  -0.070587316578 0.03569197  0.00037427  0.0039718 0.0000
+ 15   -763.1736799958  -0.002448875555 0.02637377  0.00028194  0.0025504 0.0000
+ 16   -763.1729203548   0.000759641036 0.01750611  0.00019063  0.0025275 0.0000
+ 17   -763.1747327165  -0.001812361734 0.01250449  0.00013858  0.0025316 0.0000
+ 18   -763.1705716392   0.004161077333 0.00857707  0.00009676  0.0025385 0.0000
+ 19   -763.1697460473   0.000825591900 0.00528429  0.00006071  0.0025542 0.0000
+               *** Restarting incremental Fock matrix formation ***
+                                   *** Resetting DIIS ***
+ 20   -763.1686939896   0.001052057619 0.00352944  0.00004184  0.0025805 0.0000
+ 21   -763.1685770504   0.000116939201 0.00248834  0.00003066  0.0026015 0.0000
+ 22   -763.1679972543   0.000579796150 0.00156635  0.00001981  0.0026215 0.0000
+ 23   -763.1674509031   0.000546351187 0.00082940  0.00001022  0.0026474 0.0000
+ 24   -763.1669204141   0.000530489034 0.00040761  0.00000478  0.0026755 0.0000
+ 25   -763.1679672720  -0.001046857904 0.00078561  0.00001204  0.0026932 0.0000
+ 26   -763.1683140458  -0.000346773793 0.00069713  0.00001169  0.0026818 0.0000
+ 27   -763.1683642229  -0.000050177110 0.00048930  0.00000817  0.0026861 0.0000
+ 28   -763.1683963910  -0.000032168170 0.00035861  0.00000620  0.0027042 0.0000
+ 29   -763.1684860062  -0.000089615143 0.00034663  0.00000619  0.0027185 0.0000
+ 30   -763.1685772050  -0.000091198822 0.00047425  0.00000777  0.0027248 0.0000
+ 31   -763.1686474405  -0.000070235488 0.00045513  0.00000729  0.0027248 0.0000
+ 32   -763.1686942165  -0.000046776023 0.00037973  0.00000603  0.0027323 0.0000
+ 33   -763.1687408175  -0.000046600950 0.00037504  0.00000581  0.0027442 0.0000
+ 34   -763.1687795837  -0.000038766220 0.00041132  0.00000623  0.0027525 0.0000
+ 35   -763.1688199052  -0.000040321533 0.00044202  0.00000660  0.0027578 0.0000
+ 36   -763.1688515596  -0.000031654361 0.00042000  0.00000624  0.0027630 0.0000
+ 37   -763.1688809181  -0.000029358533 0.00039839  0.00000588  0.0027712 0.0000
+ 38   -763.1689017985  -0.000020880346 0.00040881  0.00000599  0.0027800 0.0000
+ 39   -763.1689212582  -0.000019459749 0.00042576  0.00000620  0.0027868 0.0000
+               *** Restarting incremental Fock matrix formation ***
+                                   *** Resetting DIIS ***
+ 40   -763.1688885654   0.000032692811 0.00094811  0.00001359  0.0027930 0.0000
+ 41   -763.1689258590  -0.000037293583 0.00085523  0.00001226  0.0027780 0.0000
+ 42   -763.1689916825  -0.000065823471 0.00053145  0.00000767  0.0027884 0.0000
+ 43   -763.1690607272  -0.000069044773 0.00017525  0.00000262  0.0028162 0.0000
+ 44   -763.1690784185  -0.000017691257 0.00003354  0.00000058  0.0028450 0.0000
+ 45   -763.1689874304   0.000090988054 0.00065690  0.00000925  0.0028592 0.0000
+ 46   -763.1690191438  -0.000031713350 0.00064229  0.00000908  0.0028381 0.0000
+ 47   -763.1690809074  -0.000061763626 0.00037862  0.00000541  0.0028427 0.0000
+ 48   -763.1691050716  -0.000024164206 0.00030841  0.00000439  0.0028651 0.0000
+ 49   -763.1690976060   0.000007465620 0.00037968  0.00000535  0.0028786 0.0000
+ 50   -763.1690744165   0.000023189536 0.00054334  0.00000761  0.0028825 0.0000
+ 51   -763.1690994644  -0.000025047952 0.00049012  0.00000688  0.0028803 0.0000
+ 52   -763.1691308819  -0.000031417535 0.00038912  0.00000547  0.0028895 0.0000
+ 53   -763.1691381510  -0.000007269024 0.00040255  0.00000563  0.0029031 0.0000
+ 54   -763.1691394717  -0.000001320761 0.00045451  0.00000633  0.0029108 0.0000
+ 55   -763.1691446397  -0.000005167945 0.00048716  0.00000677  0.0029153 0.0000
+ 56   -763.1691636449  -0.000019005267 0.00044926  0.00000625  0.0029206 0.0000
+ 57   -763.1691790119  -0.000015366961 0.00042455  0.00000590  0.0029301 0.0000
+ 58   -763.1691852900  -0.000006278079 0.00044487  0.00000616  0.0029394 0.0000
+ 59   -763.1691919900  -0.000006700030 0.00046589  0.00000643  0.0029462 0.0000
+               *** Restarting incremental Fock matrix formation ***
+                                   *** Resetting DIIS ***
+ 60   -763.1690944113   0.000097578672 0.00103587  0.00001416  0.0029526 0.0000
+ 61   -763.1691391813  -0.000044769913 0.00093238  0.00001276  0.0029370 0.0000
+ 62   -763.1692252239  -0.000086042621 0.00057214  0.00000789  0.0029482 0.0000
+ 63   -763.1693127184  -0.000087494553 0.00018082  0.00000258  0.0029780 0.0000
+ 64   -763.1693397774  -0.000027058941 0.00003172  0.00000053  0.0030085 0.0000
+ 65   -763.1692169871   0.000122790300 0.00071963  0.00000970  0.0030231 0.0000
+ 66   -763.1692477927  -0.000030805631 0.00070167  0.00000950  0.0030006 0.0000
+ 67   -763.1693177619  -0.000069969209 0.00040508  0.00000555  0.0030058 0.0000
+ 68   -763.1693432804  -0.000025518481 0.00033015  0.00000450  0.0030299 0.0000
+ 69   -763.1693323613   0.000010919061 0.00041196  0.00000556  0.0030442 0.0000
+ 70   -763.1693041831   0.000028178179 0.00059320  0.00000796  0.0030481 0.0000
+ 71   -763.1693314044  -0.000027221296 0.00053208  0.00000716  0.0030457 0.0000
+ 72   -763.1693659475  -0.000034543045 0.00041839  0.00000565  0.0030557 0.0000
+ 73   -763.1693726984  -0.000006750957 0.00043536  0.00000584  0.0030704 0.0000
+ 74   -763.1693732048  -0.000000506391 0.00049418  0.00000661  0.0030784 0.0000
+ 75   -763.1693784009  -0.000005196028 0.00052980  0.00000707  0.0030832 0.0000
+ 76   -763.1693992924  -0.000020891583 0.00048636  0.00000649  0.0030888 0.0000
+ 77   -763.1694159059  -0.000016613442 0.00045884  0.00000612  0.0030990 0.0000
+ 78   -763.1694222923  -0.000006386421 0.00048253  0.00000641  0.0031090 0.0000
+ 79   -763.1694294085  -0.000007116171 0.00050614  0.00000671  0.0031162 0.0000
+               *** Restarting incremental Fock matrix formation ***
+                                   *** Resetting DIIS ***
+ 80   -763.1693231716   0.000106236871 0.00112907  0.00001482  0.0031229 0.0000
+ 81   -763.1693726875  -0.000049515857 0.00101491  0.00001335  0.0031067 0.0000
+ 82   -763.1694670036  -0.000094316138 0.00061783  0.00000819  0.0031188 0.0000
+ 83   -763.1695618500  -0.000094846439 0.00018993  0.00000262  0.0031506 0.0000
+ 84   -763.1695901962  -0.000028346164 0.00003117  0.00000051  0.0031827 0.0000
+ 85   -763.1694570442   0.000133152039 0.00078531  0.00001018  0.0031979 0.0000
+ 86   -763.1694912940  -0.000034249793 0.00076562  0.00000997  0.0031741 0.0000
+ 87   -763.1695684382  -0.000077144218 0.00043634  0.00000575  0.0031797 0.0000
+ 88   -763.1695960264  -0.000027588256 0.00035514  0.00000466  0.0032055 0.0000
+ 89   -763.1695837397   0.000012286715 0.00044702  0.00000580  0.0032206 0.0000
+ 90   -763.1695532148   0.000030524906 0.00064618  0.00000834  0.0032246 0.0000
+ 91   -763.1695832983  -0.000030083455 0.00057857  0.00000750  0.0032220 0.0000
+ 92   -763.1696214626  -0.000038164372 0.00045202  0.00000587  0.0032327 0.0000
+ 93   -763.1696288200  -0.000007357312 0.00047148  0.00000609  0.0032484 0.0000
+ 94   -763.1696294573  -0.000000637377 0.00053712  0.00000691  0.0032569 0.0000
+ 95   -763.1696354441  -0.000005986786 0.00057618  0.00000740  0.0032618 0.0000
+ 96   -763.1696585810  -0.000023136915 0.00052787  0.00000679  0.0032679 0.0000
+ 97   -763.1696769869  -0.000018405914 0.00049717  0.00000639  0.0032787 0.0000
+ 98   -763.1696840722  -0.000007085275 0.00052372  0.00000670  0.0032893 0.0000
+ 99   -763.1696920223  -0.000007950087 0.00055009  0.00000703  0.0032969 0.0000
+               *** Restarting incremental Fock matrix formation ***
+                                   *** Resetting DIIS ***
+100   -763.1695785212   0.000113501108 0.00122721  0.00001553  0.0033040 0.0000
+101   -763.1696328803  -0.000054359089 0.00110287  0.00001399  0.0032869 0.0000
+102   -763.1697351008  -0.000102220527 0.00067045  0.00000857  0.0032998 0.0000
+103   -763.1698373791  -0.000102278251 0.00020472  0.00000272  0.0033333 0.0000
+104   -763.1698675918  -0.000030212706 0.00003238  0.00000052  0.0033673 0.0000
+105   -763.1697250042   0.000142587563 0.00085245  0.00001066  0.0033832 0.0000
+106   -763.1697622931  -0.000037288846 0.00083459  0.00001049  0.0033581 0.0000
+107   -763.1698462505  -0.000083957429 0.00047500  0.00000605  0.0033639 0.0000
+108   -763.1698767307  -0.000030480251 0.00038445  0.00000487  0.0033912 0.0000
+109   -763.1698635978   0.000013132952 0.00048483  0.00000608  0.0034073 0.0000
+110   -763.1698311018   0.000032495972 0.00070161  0.00000875  0.0034115 0.0000
+111   -763.1698636495  -0.000032547736 0.00063075  0.00000789  0.0034087 0.0000
+112   -763.1699055523  -0.000041902766 0.00049173  0.00000617  0.0034199 0.0000
+113   -763.1699141674  -0.000008615128 0.00051136  0.00000639  0.0034364 0.0000
+114   -763.1699152236  -0.000001056202 0.00058334  0.00000726  0.0034455 0.0000
+115   -763.1699220561  -0.000006832448 0.00062659  0.00000778  0.0034506 0.0000
+116   -763.1699473453  -0.000025289175 0.00057499  0.00000715  0.0034569 0.0000
+117   -763.1699678816  -0.000020536347 0.00054056  0.00000672  0.0034683 0.0000
+118   -763.1699761159  -0.000008234245 0.00056878  0.00000704  0.0034795 0.0000
+119   -763.1699850770  -0.000008961139 0.00059809  0.00000739  0.0034874 0.0000
+               *** Restarting incremental Fock matrix formation ***
+                                   *** Resetting DIIS ***
+120   -763.1698648414   0.000120235582 0.00132905  0.00001627  0.0034948 0.0000
+121   -763.1699240585  -0.000059217056 0.00119585  0.00001468  0.0034767 0.0000
+122   -763.1700336450  -0.000109586532 0.00073221  0.00000907  0.0034900 0.0000
+123   -763.1701436056  -0.000109960605 0.00022830  0.00000294  0.0035251 0.0000
+124   -763.1701768137  -0.000033208089 0.00003642  0.00000056  0.0035609 0.0000
+
+               *****************************************************
+               *                      ERROR                        *
+               *        SCF NOT CONVERGED AFTER 125 CYCLES         *
+               *****************************************************
+
+
+---------------
+SCF CONVERGENCE
+---------------
+
+  Last Energy change         ...   -3.3208e-05  Tolerance :   1.0000e-08
+  Last MAX-Density change    ...    3.6422e-05  Tolerance :   1.0000e-07
+  Last RMS-Density change    ...    5.6313e-07  Tolerance :   5.0000e-09
+  Last DIIS Error            ...    3.5609e-03  Tolerance :   5.0000e-07
+
+     --------------------------------------------------------------------
+                                      ERROR
+     This wavefunction IS NOT CONVERGED! 
+     But SCFConvergence was forced (by user or by method)
+     Aborting ...
+     --------------------------------------------------------------------
+
+
+
+ORCA finished by error termination in SCF
+Calling Command: mpirun -np 24  /sw/apps/orca/orca_4_2_0_linux_x86-64_openmpi314/orca_scf_mpi 64_Gd.gbw b 64_Gd 
+[file orca_tools/qcmsg.cpp, line 458]: 
+  .... aborting the run
+

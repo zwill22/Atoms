@@ -1,0 +1,757 @@
+
+                                 *****************
+                                 * O   R   C   A *
+                                 *****************
+
+           --- An Ab Initio, DFT and Semiempirical electronic structure package ---
+
+                  #######################################################
+                  #                        -***-                        #
+                  #          Department of theory and spectroscopy      #
+                  #               Directorship: Frank Neese             #
+                  #        Max Planck Institute fuer Kohlenforschung    #
+                  #                Kaiser Wilhelm Platz 1               #
+                  #                 D-45470 Muelheim/Ruhr               #
+                  #                      Germany                        #
+                  #                                                     #
+                  #                  All rights reserved                #
+                  #                        -***-                        #
+                  #######################################################
+
+
+                         Program Version 4.2.0 -  RELEASE  -
+
+
+ With contributions from (in alphabetic order):
+   Daniel Aravena         : Magnetic Suceptibility
+   Michael Atanasov       : Ab Initio Ligand Field Theory (pilot matlab implementation)
+   Alexander A. Auer      : GIAO ZORA, VPT2
+   Ute Becker             : Parallelization
+   Giovanni Bistoni       : ED, misc. LED, open-shell LED, HFLED
+   Martin Brehm           : Molecular dynamics
+   Dmytro Bykov           : SCF Hessian
+   Vijay G. Chilkuri      : MRCI spin determinant printing, contributions to CSF-ICE
+   Dipayan Datta          : RHF DLPNO-CCSD density
+   Achintya Kumar Dutta   : EOM-CC, STEOM-CC
+   Dmitry Ganyushin       : Spin-Orbit,Spin-Spin,Magnetic field MRCI
+   Miquel Garcia          : C-PCM Hessian, Gaussian charge scheme
+   Yang Guo               : DLPNO-NEVPT2, CIM, IAO-localization
+   Andreas Hansen         : Spin unrestricted coupled pair/coupled cluster methods
+   Benjamin Helmich-Paris : CASSCF linear response (MC-RPA)
+   Lee Huntington         : MR-EOM, pCC
+   Robert Izsak           : Overlap fitted RIJCOSX, COSX-SCS-MP3, EOM
+   Christian Kollmar      : KDIIS, OOCD, Brueckner-CCSD(T), CCSD density
+   Simone Kossmann        : Meta GGA functionals, TD-DFT gradient, OOMP2, MP2 Hessian
+   Martin Krupicka        : AUTO-CI
+   Lucas Lang             : DCDCAS
+   Dagmar Lenk            : GEPOL surface, SMD
+   Dimitrios Liakos       : Extrapolation schemes; Compound Job, initial MDCI parallelization
+   Dimitrios Manganas     : Further ROCIS development; embedding schemes
+   Dimitrios Pantazis     : SARC Basis sets
+   Taras Petrenko         : DFT Hessian,TD-DFT gradient, ASA, ECA, R-Raman, ABS, FL, XAS/XES, NRVS
+   Peter Pinski           : DLPNO-MP2, DLPNO-MP2 Gradient
+   Christoph Reimann      : Effective Core Potentials
+   Marius Retegan         : Local ZFS, SOC
+   Christoph Riplinger    : Optimizer, TS searches, QM/MM, DLPNO-CCSD(T), (RO)-DLPNO pert. Triples
+   Tobias Risthaus        : Range-separated hybrids, TD-DFT gradient, RPA, STAB
+   Michael Roemelt        : Original ROCIS implementation
+   Masaaki Saitow         : Open-shell DLPNO-CCSD energy and density
+   Barbara Sandhoefer     : DKH picture change effects
+   Avijit Sen             : IP-ROCIS
+   Kantharuban Sivalingam : CASSCF convergence, NEVPT2, FIC-MRCI
+   Bernardo de Souza      : ESD, SOC TD-DFT
+   Georgi Stoychev        : AutoAux, RI-MP2 NMR
+   Willem Van den Heuvel  : Paramagnetic NMR
+   Boris Wezisla          : Elementary symmetry handling
+   Frank Wennmohs         : Technical directorship
+
+
+ We gratefully acknowledge several colleagues who have allowed us to
+ interface, adapt or use parts of their codes:
+   Stefan Grimme, W. Hujo, H. Kruse,             : VdW corrections, initial TS optimization,
+                  C. Bannwarth                     DFT functionals, gCP, sTDA/sTD-DF
+   Ed Valeev, F. Pavosevic, A. Kumar             : LibInt (2-el integral package), F12 methods
+   Garnet Chan, S. Sharma, J. Yang, R. Olivares  : DMRG
+   Ulf Ekstrom                                   : XCFun DFT Library
+   Mihaly Kallay                                 : mrcc  (arbitrary order and MRCC methods)
+   Andreas Klamt, Michael Diedenhofen            : otool_cosmo (COSMO solvation model)
+   Jiri Pittner, Ondrej Demel                    : Mk-CCSD
+   Frank Weinhold                                : gennbo (NPA and NBO analysis)
+   Christopher J. Cramer and Donald G. Truhlar   : smd solvation model
+   Lars Goerigk                                  : TD-DFT with DH, B97 family of functionals
+   V. Asgeirsson, H. Jonsson                     : NEB implementation
+   FAccTs GmbH                                   : IRC, NEB, NEB-TS, Multilevel, MM, QM/MM, CI optimization
+   S Lehtola, MJT Oliveira, MAL Marques          : LibXC Library
+
+
+ Your calculation uses the libint2 library for the computation of 2-el integrals
+ For citations please refer to: http://libint.valeyev.net
+
+ Your ORCA version has been built with support for libXC version: 4.2.3
+ For citations please refer to: https://tddft.org/programs/libxc/
+
+ This ORCA versions uses:
+   CBLAS   interface :  Fast vector & matrix operations
+   LAPACKE interface :  Fast linear algebra routines
+   SCALAPACK package :  Parallel linear algebra routines
+
+
+----- Orbital basis set information -----
+Your calculation utilizes the basis: def2-QZVPPD
+   F. Weigend and R. Ahlrichs, Phys. Chem. Chem. Phys. 7, 3297 (2005).
+   D. Rappoport and F. Furche, J. Chem. Phys. 133 134105 (2010).
+
+================================================================================
+                                        WARNINGS
+                       Please study these warnings very carefully!
+================================================================================
+
+
+WARNING: your system is open-shell and RHF/RKS was chosen
+  ===> : WILL SWITCH to UHF/UKS
+
+
+WARNING: MDCI localization with Augmented Hessian Foster-Boys
+  ===> : Switching off randomization!
+
+WARNING: Post HF methods need fully converged wavefunctions
+  ===> : Setting SCFConvForced true
+         You can overwrite this default with %scf ConvForced false 
+
+
+INFO   : the flag for use of LIBINT has been found!
+
+================================================================================
+                                       INPUT FILE
+================================================================================
+NAME = 23_V.in
+|  1> #
+|  2> # 23_V CCSD(T)/Def2-TZVP
+|  3> #
+|  4> ! CCSD(T) Def2-QZVPPD tightscf veryslowconv kdiis 
+|  5> 
+|  6> *xyz 0 4
+|  7>  V 0.0 0.0 0.0
+|  8> *
+|  9> 
+| 10> %maxcore 5000 
+| 11> 
+| 12> %pal
+| 13> nprocs 24
+| 14> end
+| 15> 
+| 16> %scf
+| 17> maxiter 200
+| 18> diismaxeq 40
+| 19> directresetfreq 1
+| 20> end
+| 21> 
+| 22> %mdci
+| 23> maxdiis 25
+| 24> maxiter 100
+| 25> end
+| 26> 
+| 27> 
+| 28>                          ****END OF INPUT****
+================================================================================
+
+                       ****************************
+                       * Single Point Calculation *
+                       ****************************
+
+---------------------------------
+CARTESIAN COORDINATES (ANGSTROEM)
+---------------------------------
+  V      0.000000    0.000000    0.000000
+
+----------------------------
+CARTESIAN COORDINATES (A.U.)
+----------------------------
+  NO LB      ZA    FRAG     MASS         X           Y           Z
+   0 V    23.0000    0    50.940    0.000000    0.000000    0.000000
+
+--------------------------------
+INTERNAL COORDINATES (ANGSTROEM)
+--------------------------------
+ V      0   0   0     0.000000000000     0.00000000     0.00000000
+
+---------------------------
+INTERNAL COORDINATES (A.U.)
+---------------------------
+ V      0   0   0     0.000000000000     0.00000000     0.00000000
+
+---------------------
+BASIS SET INFORMATION
+---------------------
+There are 1 groups of distinct atoms
+
+ Group   1 Type V   : 24s18p9d3f2g contracted to 11s6p5d3f2g pattern {114111111111/951111/51111/111/11}
+
+Atom   0V    basis set group =>   1
+
+
+           ************************************************************
+           *        Program running with 24 parallel MPI-processes    *
+           *              working on a common directory               *
+           ************************************************************
+------------------------------------------------------------------------------
+                           ORCA GTO INTEGRAL CALCULATION
+------------------------------------------------------------------------------
+
+                         BASIS SET STATISTICS AND STARTUP INFO
+
+ # of primitive gaussian shells          ...   56
+ # of primitive gaussian functions       ...  162
+ # of contracted shells                  ...   27
+ # of contracted basis functions         ...   93
+ Highest angular momentum                ...    4
+ Maximum contraction depth               ...   11
+ Integral package used                   ... LIBINT
+ Integral threshhold            Thresh   ...  2.500e-11
+ Primitive cut-off              TCut     ...  2.500e-12
+
+
+------------------------------ INTEGRAL EVALUATION ----------------------------
+
+
+ * One electron integrals 
+ Pre-screening matrix                    ... done
+ Shell pair data                         ... done (   0.000 sec)
+
+
+
+           ************************************************************
+           *        Program running with 24 parallel MPI-processes    *
+           *              working on a common directory               *
+           ************************************************************
+-------------------------------------------------------------------------------
+                                 ORCA SCF
+-------------------------------------------------------------------------------
+
+------------
+SCF SETTINGS
+------------
+Hamiltonian:
+ Ab initio Hamiltonian  Method          .... Hartree-Fock(GTOs)
+
+
+General Settings:
+ Integral files         IntName         .... 23_V
+ Hartree-Fock type      HFTyp           .... UHF
+ Total Charge           Charge          ....    0
+ Multiplicity           Mult            ....    4
+ Number of Electrons    NEL             ....   23
+ Basis Dimension        Dim             ....   93
+ Nuclear Repulsion      ENuc            ....      0.0000000000 Eh
+
+Convergence Acceleration:
+ DIIS                   CNVDIIS         .... off
+ Newton-Raphson         CNVNR           .... off
+ SOSCF                  CNVSOSCF        .... off
+ Level Shifting         CNVShift        .... off
+ Zerner damping         CNVZerner       .... off
+ Static damping         CNVDamp         .... off
+ Fernandez-Rico         CNVRico         .... off
+
+SCF Procedure:
+ Maximum # iterations   MaxIter         ....   200
+ SCF integral mode      SCFMode         .... Direct
+   Integral package                     .... LIBINT
+ Reset frequency        DirectResetFreq ....     1
+ Integral Threshold     Thresh          ....  2.500e-11 Eh
+ Primitive CutOff       TCut            ....  2.500e-12 Eh
+
+Convergence Tolerance:
+ Convergence Check Mode ConvCheckMode   .... Total+1el-Energy
+ Convergence forced     ConvForced      .... 1
+ Energy Change          TolE            ....  1.000e-08 Eh
+ 1-El. energy change                    ....  1.000e-05 Eh
+
+
+Diagonalization of the overlap matrix:
+Smallest eigenvalue                        ... 1.191e-03
+Time for diagonalization                   ...    0.003 sec
+Threshold for overlap eigenvalues          ... 1.000e-08
+Number of eigenvalues below threshold      ... 0
+Time for construction of square roots      ...    0.012 sec
+Total time needed                          ...    0.015 sec
+
+-------------------
+DFT GRID GENERATION
+-------------------
+
+General Integration Accuracy     IntAcc      ...  4.340
+Radial Grid Type                 RadialGrid  ... Gauss-Chebyshev
+Angular Grid (max. acc.)         AngularGrid ... Lebedev-110
+Angular grid pruning method      GridPruning ... 3 (G Style)
+Weight generation scheme         WeightScheme... Becke
+Basis function cutoff            BFCut       ...    1.0000e-11
+Integration weight cutoff        WCut        ...    1.0000e-14
+Grids for H and He will be reduced by one unit
+
+# of grid points (after initial pruning)     ...   2972 (   0.0 sec)
+# of grid points (after weights+screening)   ...   2972 (   0.0 sec)
+Grid point division into batches done        ...    0.0 sec
+Reduced shell lists constructed in    0.0 sec
+
+Total number of grid points                  ...     2972
+Total number of batches                      ...       47
+Average number of points per batch           ...       63
+Average number of grid points per atom       ...     2972
+Average number of shells per batch           ...     8.00 (29.63%)
+Average number of basis functions per batch  ...    30.67 (32.97%)
+Average number of large shells per batch     ...     6.00 (75.00%)
+Average number of large basis fcns per batch ...    19.33 (63.04%)
+Maximum spatial batch extension              ...  18.71, 28.73, 28.73 au
+Average spatial batch extension              ...   0.80,  1.22,  1.22 au
+
+Time for grid setup =    0.057 sec
+
+------------------------------
+INITIAL GUESS: MODEL POTENTIAL
+------------------------------
+Loading Hartree-Fock densities                     ... done
+Calculating cut-offs                               ... done
+Setting up the integral package                    ... done
+Initializing the effective Hamiltonian             ... done
+Starting the Coulomb interaction                   ... done (   0.0 sec)
+Reading the grid                                   ... done
+Mapping shells                                     ... done
+Starting the XC term evaluation                    ... done (   0.0 sec)
+Transforming the Hamiltonian                       ... done (   0.0 sec)
+Diagonalizing the Hamiltonian                      ... done (   0.0 sec)
+Back transforming the eigenvectors                 ... done (   0.0 sec)
+Now organizing SCF variables                       ... done
+                      ------------------
+                      INITIAL GUESS DONE (   0.2 sec)
+                      ------------------
+--------------
+SCF ITERATIONS
+--------------
+ITER       Energy         Delta-E        Max-DP      RMS-DP      [F,P]   Gradient Norm
+                             ****Turning on KDIIS(Cayley)****
+  0   -942.4469096015   0.000000000000 0.01629792  0.00059089  0.5384467   0.290325277
+  1   -942.5291307378  -0.082221136310 0.02426159  0.00070901  0.4858730   0.251040063
+  2   -942.6003275513  -0.071196813402 0.04430101  0.00144142  0.3888004   0.195821395
+  3   -942.6558280671  -0.055500515896 0.01695672  0.00061698  0.2339584   0.110546743
+  4   -942.6664697766  -0.010641709463 0.02266818  0.00067533  0.0249595   0.011030799
+  5   -942.6738159262  -0.007346149546 0.02178083  0.00068260  0.0128181   0.006828566
+  6   -942.6659277483   0.007888177847 0.03402139  0.00109564  0.0229771   0.009943541
+  7   -942.6553747510   0.010552997265 0.01022297  0.00025528  0.0316164   0.013098034
+  8   -942.6587577881  -0.003383037065 0.00227132  0.00006515  0.0249921   0.010755779
+  9   -942.6595966467  -0.000838858620 0.01741029  0.00059180  0.0240006   0.010387406
+Warning: badly conditioned DIIS matrix, 1 vectors out of 11 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 10 destroyed
+ 10   -942.6660744677  -0.006477820969 0.02670847  0.00087694  0.0187818   0.008472088
+ 11   -942.6732586052  -0.007184137531 0.00025568  0.00000625  0.0099847   0.007654160
+Warning: badly conditioned DIIS matrix, 1 vectors out of 11 destroyed
+ 12   -942.6732911043  -0.000032499068 0.01515281  0.00044439  0.0099839   0.007635430
+Warning: badly conditioned DIIS matrix, 1 vectors out of 11 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 10 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 9 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 8 destroyed
+ 13   -942.6712779455   0.002013158842 0.01355754  0.00037206  0.0110001   0.008215445
+Warning: badly conditioned DIIS matrix, 1 vectors out of 8 destroyed
+ 14   -942.6689357328   0.002342212628 0.00665431  0.00015468  0.0130276   0.007591245
+Warning: badly conditioned DIIS matrix, 1 vectors out of 8 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 7 destroyed
+ 15   -942.6700678429  -0.001132110052 0.15006543  0.00232942  0.0133385   0.006246316
+ 16   -942.6864102720  -0.016342429138 0.13099869  0.00185917  0.0163375   0.007787425
+ 17   -942.6733683295   0.013041942502 0.01686890  0.00044647  0.0127881   0.006404190
+ 18   -942.6706688928   0.002699436696 0.00787166  0.00024650  0.0130299   0.007352092
+ 19   -942.6691794374   0.001489455391 0.09947710  0.00202913  0.0138599   0.007342823
+ 20   -942.6817633464  -0.012583909008 0.00322247  0.00004697  0.0145892   0.008865655
+Warning: badly conditioned DIIS matrix, 1 vectors out of 12 destroyed
+ 21   -942.6814589398   0.000304406626 0.03242297  0.00046449  0.0146293   0.008659317
+ 22   -942.6842447721  -0.002785832271 0.15653173  0.00198355  0.0145851   0.010660321
+ 23   -942.6924843314  -0.008239559358 0.18406389  0.00232511  0.0265160   0.015133322
+Warning: badly conditioned DIIS matrix, 1 vectors out of 14 destroyed
+ 24   -942.6881833827   0.004300948744 0.03440104  0.00062906  0.0413412   0.019022703
+ 25   -942.6928073695  -0.004623986834 0.06612438  0.00118597  0.0333676   0.017151270
+ 26   -942.6981482978  -0.005340928316 0.02043379  0.00032652  0.0096739   0.009541457
+ 27   -942.6987006108  -0.000552312955 0.00722920  0.00012429  0.0091176   0.008739717
+ 28   -942.6986347783   0.000065832480 0.02553496  0.00039223  0.0089266   0.008652739
+ 29   -942.6985689465   0.000065831782 0.05447419  0.00084472  0.0113108   0.008780443
+ 30   -942.6984708145   0.000098132013 0.03220466  0.00036101  0.0166233   0.008423443
+ 31   -942.6988176339  -0.000346819371 0.01766762  0.00042722  0.0153402   0.007717528
+ 32   -942.6997216039  -0.000903970030 0.06626242  0.00120851  0.0139267   0.007817362
+ 33   -942.7014391496  -0.001717545710 0.06928920  0.00078947  0.0102723   0.008451040
+ 34   -942.7018762295  -0.000437079893 0.03214790  0.00041796  0.0107285   0.009419948
+ 35   -942.7012274891   0.000648740440 0.02248778  0.00038362  0.0137045   0.009560133
+ 36   -942.7022809934  -0.001053504273 0.02888874  0.00088071  0.0108304   0.009523751
+ 37   -942.7035720081  -0.001291014766 0.09661057  0.00113105  0.0127187   0.011229904
+ 38   -942.6994644768   0.004107531338 0.01331846  0.00024746  0.0165069   0.015635541
+ 39   -942.7001833352  -0.000718858403 0.00647632  0.00008415  0.0174924   0.015883367
+ 40   -942.7004973511  -0.000314015914 0.12611257  0.00143830  0.0171656   0.015567138
+Warning: badly conditioned DIIS matrix, 1 vectors out of 30 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 29 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 28 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 27 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 26 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 25 destroyed
+ 41   -942.6936176332   0.006879717919 0.12624658  0.00198295  0.0265966   0.024077913
+Warning: badly conditioned DIIS matrix, 1 vectors out of 25 destroyed
+ 42   -942.6886146365   0.005002996705 0.03747316  0.00048435  0.0320672   0.026153913
+Warning: badly conditioned DIIS matrix, 1 vectors out of 25 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 24 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 23 destroyed
+ 43   -942.6887773224  -0.000162685966 0.20942448  0.00284787  0.0315663   0.029489496
+Warning: badly conditioned DIIS matrix, 1 vectors out of 23 destroyed
+ 44   -942.6998297012  -0.011052378785 0.15138854  0.00168405  0.0191792   0.016634617
+Warning: badly conditioned DIIS matrix, 1 vectors out of 23 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 22 destroyed
+ 45   -942.7050020154  -0.005172314187 0.04023743  0.00064032  0.0072341   0.006546716
+ 46   -942.7038142985   0.001187716890 0.04980959  0.00066188  0.0098535   0.005224656
+ 47   -942.7034292601   0.000385038469 0.01387853  0.00024817  0.0106877   0.006558245
+ 48   -942.7027905487   0.000638711393 0.07613227  0.00107020  0.0109466   0.007789965
+ 49   -942.7037739272  -0.000983378563 0.05656446  0.00094700  0.0086422   0.008265212
+ 50   -942.7033558318   0.000418095389 0.08728058  0.00133910  0.0066025   0.006998190
+ 51   -942.7005205785   0.002835253298 0.02912515  0.00038471  0.0095613   0.009599068
+ 52   -942.6992109579   0.001309620636 0.03450687  0.00044654  0.0123220   0.010965663
+ 53   -942.6992362844  -0.000025326475 0.02282949  0.00036370  0.0121293   0.012767218
+ 54   -942.6987710076   0.000465276815 0.01879015  0.00030704  0.0135277   0.013906388
+Warning: badly conditioned DIIS matrix, 1 vectors out of 31 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 30 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 29 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 28 destroyed
+ 55   -942.6990234166  -0.000252409053 0.04066369  0.00083066  0.0146752   0.015119984
+ 56   -942.7015160660  -0.002492649414 0.00185584  0.00002504  0.0117677   0.012158350
+Warning: badly conditioned DIIS matrix, 1 vectors out of 29 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 28 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 27 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 26 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 25 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 24 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 23 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 22 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 21 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 20 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 19 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 18 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 17 destroyed
+ 57   -942.7015019849   0.000014081145 0.06138178  0.00116377  0.0117787   0.012171334
+ 58   -942.6996575670   0.001844417878 0.01891225  0.00027804  0.0117363   0.007149108
+ 59   -942.6992202153   0.000437351742 0.08852512  0.00132827  0.0134970   0.007893936
+ 60   -942.6984289384   0.000791276827 0.01521024  0.00021517  0.0102030   0.010602442
+ 61   -942.6985482454  -0.000119306962 0.02469355  0.00053786  0.0104440   0.010760990
+Warning: badly conditioned DIIS matrix, 1 vectors out of 21 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 20 destroyed
+ 62   -942.7002646795  -0.001716434110 0.05510643  0.00070096  0.0073780   0.007763892
+ 63   -942.7009235497  -0.000658870234 0.01962788  0.00035421  0.0085131   0.006466356
+ 64   -942.7004135271   0.000510022639 0.02823888  0.00054435  0.0098744   0.007402709
+ 65   -942.6990740910   0.001339436147 0.05221857  0.00070478  0.0127792   0.009467884
+ 66   -942.6978831775   0.001190913421 0.11451037  0.00174088  0.0143749   0.011091574
+ 67   -942.7010766331  -0.003193455537 0.02202597  0.00034242  0.0137811   0.006675631
+ 68   -942.7021658724  -0.001089239293 0.07696295  0.00088504  0.0115533   0.006044854
+ 69   -942.7020477809   0.000118091424 0.04033529  0.00056301  0.0137050   0.007807316
+ 70   -942.7027894174  -0.000741636409 0.01267519  0.00020398  0.0132923   0.008403586
+ 71   -942.7027651884   0.000024228999 0.00156479  0.00003883  0.0133436   0.008779880
+Warning: badly conditioned DIIS matrix, 1 vectors out of 29 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 28 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 27 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 26 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 25 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 24 destroyed
+ 72   -942.7026977876   0.000067400777 0.05326551  0.00143489  0.0135289   0.008672943
+Warning: badly conditioned DIIS matrix, 1 vectors out of 24 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 23 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 22 destroyed
+ 73   -942.7058677162  -0.003169928654 0.03726291  0.00076079  0.0089082   0.008853799
+ 74   -942.7055466730   0.000321043234 0.04640378  0.00079830  0.0068711   0.006389689
+ 75   -942.7056689582  -0.000122285213 0.03159052  0.00045423  0.0080642   0.007444654
+ 76   -942.7053520382   0.000316920001 0.00186373  0.00002472  0.0096623   0.008977472
+Warning: badly conditioned DIIS matrix, 1 vectors out of 25 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 24 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 23 destroyed
+ 77   -942.7053508942   0.000001144020 0.05092828  0.00067947  0.0096656   0.008999486
+Warning: badly conditioned DIIS matrix, 1 vectors out of 23 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 22 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 21 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 20 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 19 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 18 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 17 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 16 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 15 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 14 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 13 destroyed
+ 78   -942.7054875670  -0.000136672834 0.11386181  0.00130411  0.0086725   0.008629333
+ 79   -942.7059414001  -0.000453833086 0.01770125  0.00021308  0.0062331   0.005498903
+ 80   -942.7059147369   0.000026663242 0.02170020  0.00026164  0.0063686   0.005636603
+Warning: badly conditioned DIIS matrix, 1 vectors out of 15 destroyed
+ 81   -942.7058666205   0.000048116362 0.10214990  0.00119932  0.0061073   0.005308293
+Warning: badly conditioned DIIS matrix, 1 vectors out of 15 destroyed
+ 82   -942.7065447142  -0.000678093673 0.04119431  0.00065809  0.0023054   0.002471530
+ 83   -942.7064480918   0.000096622348 0.07540847  0.00096974  0.0027998   0.002751879
+ 84   -942.7062425298   0.000205562038 0.02970210  0.00069555  0.0022013   0.002162722
+Warning: badly conditioned DIIS matrix, 1 vectors out of 17 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 16 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 15 destroyed
+ 85   -942.7055759292   0.000666600609 0.13842218  0.00232470  0.0030684   0.003812827
+Warning: badly conditioned DIIS matrix, 1 vectors out of 15 destroyed
+ 86   -942.7075545162  -0.001978586988 0.02443997  0.00059185  0.0046979   0.003872482
+Warning: badly conditioned DIIS matrix, 1 vectors out of 15 destroyed
+ 87   -942.7081929929  -0.000638476747 0.07257574  0.00086601  0.0062654   0.005505684
+ 88   -942.7084797432  -0.000286750298 0.05726355  0.00075631  0.0066238   0.006376544
+ 89   -942.7089130031  -0.000433259868 0.11054160  0.00142349  0.0075568   0.007346065
+ 90   -942.7083697053   0.000543297828 0.09740954  0.00176670  0.0079607   0.007476163
+Warning: badly conditioned DIIS matrix, 1 vectors out of 18 destroyed
+ 91   -942.7069043094   0.001465395892 0.05683891  0.00070991  0.0038545   0.003337232
+ 92   -942.7065687622   0.000335547174 0.00481315  0.00006492  0.0043811   0.004059352
+ 93   -942.7065252137   0.000043548445 0.03021781  0.00041020  0.0044328   0.004160999
+ 94   -942.7068230138  -0.000297800084 0.02591637  0.00035192  0.0040512   0.003742018
+ 95   -942.7066278475   0.000195166345 0.01777879  0.00024731  0.0044006   0.003910738
+ 96   -942.7065283532   0.000099494327 0.02374004  0.00030369  0.0045037   0.004074223
+ 97   -942.7062097046   0.000318648523 0.00668731  0.00008772  0.0049311   0.004442863
+ 98   -942.7060973872   0.000112317482 0.04213098  0.00052455  0.0051210   0.004608082
+ 99   -942.7065867192  -0.000489332003 0.01621170  0.00022836  0.0041591   0.003914745
+100   -942.7066550374  -0.000068318198 0.00663232  0.00008704  0.0040264   0.004334094
+Warning: badly conditioned DIIS matrix, 1 vectors out of 27 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 26 destroyed
+101   -942.7066219426   0.000033094791 0.03243632  0.00059362  0.0040572   0.004516367
+102   -942.7071570898  -0.000535147230 0.00450163  0.00006158  0.0055708   0.005128017
+103   -942.7072035564  -0.000046466627 0.00021421  0.00000286  0.0052075   0.004888870
+Warning: badly conditioned DIIS matrix, 1 vectors out of 28 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 27 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 26 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 25 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 24 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 23 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 22 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 21 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 20 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 19 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 18 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 17 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 16 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 15 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 14 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 13 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 12 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 11 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 10 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 9 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 8 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 7 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 6 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 5 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 4 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 3 destroyed
+104   -942.7072009041   0.000002652282 0.08155545  0.00103684  0.0052213   0.004897986
+105   -942.7082002182  -0.000999314018 0.00739380  0.00010886  0.0046620   0.002214791
+106   -942.7081906448   0.000009573384 0.00078407  0.00001121  0.0041896   0.001254494
+107   -942.7082026188  -0.000011973978 0.01292174  0.00019305  0.0042220   0.001246453
+108   -942.7083319810  -0.000129362271 0.02640032  0.00036739  0.0038772   0.001918249
+Warning: badly conditioned DIIS matrix, 1 vectors out of 7 destroyed
+109   -942.7078656772   0.000466303809 0.04047431  0.00059000  0.0029805   0.002610831
+110   -942.7075201902   0.000345487052 0.08187744  0.00112485  0.0029578   0.001164119
+111   -942.7066062169   0.000913973263 0.12788579  0.00175087  0.0026259   0.001986055
+112   -942.7079509480  -0.001344731054 0.02527346  0.00032513  0.0032097   0.002881629
+113   -942.7082113487  -0.000260400768 0.00933240  0.00013131  0.0040577   0.003575418
+114   -942.7079991630   0.000212185760 0.00244846  0.00006088  0.0045335   0.004063489
+115   -942.7079315440   0.000067618995 0.03126053  0.00039153  0.0044853   0.004012429
+116   -942.7076198315   0.000311712506 0.02139070  0.00028715  0.0037082   0.003486116
+117   -942.7073947525   0.000225078951 0.01705964  0.00025242  0.0037562   0.003520794
+118   -942.7071854680   0.000209284498 0.00116999  0.00001748  0.0039378   0.003675876
+119   -942.7071963884  -0.000010920353 0.02230664  0.00035177  0.0039488   0.003680334
+120   -942.7073286534  -0.000132265058 0.00593900  0.00010330  0.0037876   0.003680439
+121   -942.7073484644  -0.000019810996 0.00062232  0.00000971  0.0038181   0.003711020
+122   -942.7073482683   0.000000196167 0.00706579  0.00009373  0.0038192   0.003713484
+123   -942.7074055007  -0.000057232458 0.00546103  0.00008912  0.0039835   0.003842846
+124   -942.7074277939  -0.000022293195 0.00877449  0.00013337  0.0039357   0.003807693
+125   -942.7074625294  -0.000034735464 0.00642818  0.00010677  0.0040770   0.003934802
+126   -942.7075374359  -0.000074906529 0.02824807  0.00034078  0.0040906   0.003941226
+Warning: badly conditioned DIIS matrix, 1 vectors out of 24 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 23 destroyed
+127   -942.7076901829  -0.000152746973 0.02691930  0.00034065  0.0044862   0.004264958
+128   -942.7075051992   0.000184983689 0.00271252  0.00003349  0.0047395   0.004431442
+129   -942.7075212714  -0.000016072198 0.02691153  0.00033689  0.0047530   0.004447273
+Warning: badly conditioned DIIS matrix, 1 vectors out of 25 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 24 destroyed
+130   -942.7073604065   0.000160864843 0.02748806  0.00032735  0.0048209   0.004511105
+131   -942.7071449063   0.000215500267 0.03517040  0.00046228  0.0048077   0.004763491
+132   -942.7073352764  -0.000190370109 0.04874801  0.00065240  0.0039801   0.003956898
+133   -942.7074345995  -0.000099323120 0.04469789  0.00054448  0.0036811   0.003804246
+Warning: badly conditioned DIIS matrix, 1 vectors out of 27 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 26 destroyed
+134   -942.7072115448   0.000223054688 0.04208529  0.00052199  0.0037508   0.003807559
+135   -942.7067998332   0.000411711605 0.05276842  0.00065547  0.0041916   0.004352816
+Warning: badly conditioned DIIS matrix, 1 vectors out of 27 destroyed
+136   -942.7072875048  -0.000487671621 0.03933366  0.00047854  0.0036731   0.003734236
+137   -942.7075637854  -0.000276280612 0.01642544  0.00020655  0.0036454   0.003668084
+138   -942.7074477811   0.000116004370 0.03651870  0.00045786  0.0036166   0.003644009
+139   -942.7071702934   0.000277487625 0.03252561  0.00045076  0.0038709   0.003904466
+140   -942.7070014956   0.000168797845 0.00832707  0.00015259  0.0041341   0.004215770
+Warning: badly conditioned DIIS matrix, 1 vectors out of 31 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 30 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 29 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 28 destroyed
+141   -942.7068920613   0.000109434316 0.14480505  0.00187954  0.0042002   0.004356795
+142   -942.7072872292  -0.000395167926 0.07396504  0.00085839  0.0048031   0.004636668
+143   -942.7068661683   0.000421060885 0.00175288  0.00002172  0.0051505   0.005154351
+144   -942.7068656093   0.000000559037 0.01913720  0.00023743  0.0051030   0.005131625
+Warning: badly conditioned DIIS matrix, 1 vectors out of 31 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 30 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 29 destroyed
+145   -942.7066577370   0.000207872261 0.06396985  0.00080879  0.0049553   0.005171779
+146   -942.7074480380  -0.000790300956 0.00314711  0.00003779  0.0048142   0.004765439
+147   -942.7074197278   0.000028310188 0.02616655  0.00034678  0.0047801   0.004738474
+148   -942.7074276746  -0.000007946850 0.02197941  0.00027428  0.0036687   0.003954500
+149   -942.7072119422   0.000215732398 0.00069262  0.00001436  0.0037494   0.004044704
+150   -942.7072213370  -0.000009394788 0.00313497  0.00004353  0.0037603   0.004047300
+151   -942.7072348233  -0.000013486238 0.01460171  0.00020617  0.0037530   0.004017638
+Warning: badly conditioned DIIS matrix, 1 vectors out of 35 destroyed
+152   -942.7072372603  -0.000002437006 0.04562994  0.00057936  0.0037155   0.003864368
+153   -942.7070734218   0.000163838493 0.02254542  0.00028205  0.0038749   0.003858053
+154   -942.7072306878  -0.000157265976 0.05852707  0.00074700  0.0036956   0.003699356
+155   -942.7073101597  -0.000079471959 0.00011863  0.00000160  0.0036758   0.003903851
+Warning: badly conditioned DIIS matrix, 1 vectors out of 38 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 37 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 36 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 35 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 34 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 33 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 32 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 31 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 30 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 29 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 28 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 27 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 26 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 25 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 24 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 23 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 22 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 21 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 20 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 19 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 18 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 17 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 16 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 15 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 14 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 13 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 12 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 11 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 10 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 9 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 8 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 7 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 6 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 5 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 4 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 3 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 2 destroyed
+156   -942.7073108912  -0.000000731505 0.00455972  0.00012930  0.0036769   0.003905360
+157   -942.7074721824  -0.000161291150 0.00161863  0.00006089  0.0038919   0.002766900
+158   -942.7075690691  -0.000096886728 0.00593954  0.00012111  0.0032476   0.001008365
+159   -942.7077313765  -0.000162307403 0.00359705  0.00008570  0.0034708   0.000880346
+160   -942.7076167764   0.000114600090 0.00172084  0.00004708  0.0033879   0.000884870
+161   -942.7075616094   0.000055166972 0.00389943  0.00009223  0.0033593   0.000873770
+162   -942.7074417086   0.000119900885 0.00442260  0.00011106  0.0033040   0.000892712
+163   -942.7075911218  -0.000149413259 0.01649406  0.00046413  0.0033603   0.000912612
+164   -942.7069575749   0.000633546957 0.01618132  0.00045467  0.0034867   0.000944456
+165   -942.7075510452  -0.000593470385 0.00499557  0.00014225  0.0032802   0.001076070
+166   -942.7077532904  -0.000202245155 0.00937622  0.00022941  0.0032354   0.001270199
+167   -942.7074458850   0.000307405365 0.02670904  0.00061619  0.0031270   0.001150698
+168   -942.7066436076   0.000802277474 0.00950441  0.00021902  0.0032886   0.002168067
+169   -942.7062800977   0.000363509915 0.06188247  0.00158362  0.0037528   0.002748853
+170   -942.7085141183  -0.002234020640 0.09695194  0.00165856  0.0039970   0.003922804
+171   -942.7133334569  -0.004819338580 0.00656372  0.00011427  0.0129416   0.011704201
+172   -942.7128547996   0.000478657304 0.02168713  0.00037190  0.0126770   0.011314986
+173   -942.7114601605   0.001394639069 0.01226688  0.00017532  0.0103389   0.009127961
+174   -942.7108853244   0.000574836078 0.11316326  0.00229418  0.0105126   0.008831729
+175   -942.7066954066   0.004189917792 0.00071145  0.00001917  0.0054807   0.002930951
+176   -942.7066900899   0.000005316685 0.01469394  0.00026285  0.0053636   0.002999622
+177   -942.7070653093  -0.000375219308 0.00844592  0.00012960  0.0043686   0.002924260
+178   -942.7072396065  -0.000174297240 0.02988370  0.00069931  0.0035755   0.002653554
+179   -942.7062094847   0.001030121775 0.01389733  0.00030043  0.0045325   0.003620790
+180   -942.7055347438   0.000674740933 0.03636120  0.00075838  0.0059409   0.004908534
+Warning: badly conditioned DIIS matrix, 1 vectors out of 26 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 25 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 24 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 23 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 22 destroyed
+181   -942.7069554653  -0.001420721499 0.02965831  0.00064359  0.0027959   0.002306428
+182   -942.7077608776  -0.000805412329 0.00138498  0.00002599  0.0023763   0.002345069
+183   -942.7077942677  -0.000033390057 0.00129479  0.00002801  0.0024151   0.002336228
+Warning: badly conditioned DIIS matrix, 1 vectors out of 24 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 23 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 22 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 21 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 20 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 19 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 18 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 17 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 16 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 15 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 14 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 13 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 12 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 11 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 10 destroyed
+184   -942.7077580445   0.000036223174 0.03604216  0.00079633  0.0023861   0.002311286
+Warning: badly conditioned DIIS matrix, 1 vectors out of 10 destroyed
+185   -942.7067134724   0.001044572074 0.02914301  0.00065224  0.0033108   0.003017553
+Warning: badly conditioned DIIS matrix, 1 vectors out of 10 destroyed
+186   -942.7075670170  -0.000853544617 0.02572644  0.00059009  0.0026731   0.002662510
+187   -942.7067959402   0.000771076882 0.00585399  0.00013089  0.0030871   0.003079126
+188   -942.7066030196   0.000192920515 0.00024697  0.00000673  0.0034474   0.003268770
+189   -942.7066130592  -0.000010039555 0.00650341  0.00015167  0.0034362   0.003251869
+190   -942.7068431753  -0.000230116065 0.00861175  0.00019378  0.0031129   0.002929982
+191   -942.7071062183  -0.000263043086 0.00257877  0.00005831  0.0028303   0.002694363
+Warning: badly conditioned DIIS matrix, 1 vectors out of 15 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 14 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 13 destroyed
+192   -942.7071811722  -0.000074953897 0.00265300  0.00006384  0.0028014   0.002628437
+193   -942.7071192261   0.000061946171 0.00124080  0.00002923  0.0028781   0.002622954
+194   -942.7071010154   0.000018210708 0.01760986  0.00039733  0.0028913   0.002637798
+195   -942.7065211425   0.000579872882 0.00104140  0.00002331  0.0036512   0.003355851
+Warning: badly conditioned DIIS matrix, 1 vectors out of 16 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 15 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 14 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 13 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 12 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 11 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 10 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 9 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 8 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 7 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 6 destroyed
+196   -942.7064819252   0.000039217257 0.06133079  0.00138178  0.0037184   0.003418665
+Warning: badly conditioned DIIS matrix, 1 vectors out of 6 destroyed
+Warning: badly conditioned DIIS matrix, 1 vectors out of 5 destroyed
+197   -942.7083866288  -0.001904703551 0.02717401  0.00060683  0.0037168   0.003646594
+Warning: badly conditioned DIIS matrix, 1 vectors out of 5 destroyed
+198   -942.7075478094   0.000838819354 0.02522035  0.00057101  0.0027299   0.002699246
+199   -942.7068110838   0.000736725646 0.00843646  0.00019071  0.0032122   0.003016724
+                    *** KDIIS BlockDiag (55.798 sec) ***
+
+               *****************************************************
+               *                      ERROR                        *
+               *        SCF NOT CONVERGED AFTER 200 CYCLES         *
+               *****************************************************
+
+
+---------------
+SCF CONVERGENCE
+---------------
+
+  Last Energy change         ...    7.3673e-04  Tolerance :   1.0000e-08
+  Last MAX-Density change    ...    8.4365e-03  Tolerance :   1.0000e-07
+  Last RMS-Density change    ...    1.9071e-04  Tolerance :   5.0000e-09
+
+     --------------------------------------------------------------------
+                                      ERROR
+     This wavefunction IS NOT CONVERGED! 
+     But SCFConvergence was forced (by user or by method)
+     Aborting ...
+     --------------------------------------------------------------------
+
+
+
+ORCA finished by error termination in SCF
+Calling Command: mpirun -np 24  /sw/apps/orca/orca_4_2_0_linux_x86-64_openmpi314/orca_scf_mpi 23_V.gbw b 23_V 
+[file orca_tools/qcmsg.cpp, line 458]: 
+  .... aborting the run
+
